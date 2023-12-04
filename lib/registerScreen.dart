@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gdsc_social_media/components.dart';
+import 'package:gdsc_social_media/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -11,8 +13,25 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
   final surnameController = TextEditingController();
   final nameController = TextEditingController();
+  void signUserIn() async {
+    try {
+      if (passwordController.text == confirmPasswordController.text) {
+        AuthService().createPersonWithRegisterPage(
+          nameController.text,
+          emailController.text,
+          passwordController.text,
+        );
+        Navigator.pop(context);
+      } else if (passwordController.text != confirmPasswordController.text) {
+        print("Şifreler birbiriyle uyuşmuyor.");
+      }
+    } on FirebaseAuthException catch (e) {
+      print(e.code);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +95,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(height: 15),
                   buildTextField(Icons.lock, passwordController, "Password",
                       true, TextInputType.text),
+                  SizedBox(height: 15),
+                  buildTextField(Icons.lock, confirmPasswordController,
+                      "Confirm Password", true, TextInputType.text),
                   SizedBox(height: 25),
-                  buildButton(() => print("İkinci butona basıldı"), "Kayıt Ol"),
+                  buildButton(signUserIn, "Kayıt Ol"),
                   Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Row(
